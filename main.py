@@ -30,11 +30,11 @@ def utility_function(action, opponent_action):
 # main loop
 for e in range(EPOCHS):
     # sample actions
-    strat_1 = agent1.get_strategy()
-    action_1 = agent1.get_action(strat_1)
+    strategy_1 = agent1.get_strategy()
+    action_1 = agent1.get_action(strategy_1)
 
-    strat_2 = agent2.get_strategy()
-    action_2 = agent2.get_action(strat_2)
+    strategy_2 = agent2.get_strategy()
+    action_2 = agent2.get_action(strategy_2)
 
     # get the action utilities
     action_utility_1 = utility_function(action_1, action_2)
