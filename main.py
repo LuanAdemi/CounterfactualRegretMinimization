@@ -4,7 +4,7 @@ from RegretMinimization import RegretMinimization
 
 """
 A little example of training two regret-minimizing agents to play rock-paper-scissors.
-This leads to a nash-equilibrium with the optimal policy is a probability of 1/3 for each action.
+This leads to a nash-equilibrium with the optimal policy being a probability of 1/3 for each action.
 """
 
 EPOCHS = 100000
