@@ -36,7 +36,7 @@ class RegretMinimization:
         # for testing, a simple static opponent strategy for sampling opponent actions
         self.opponent_strategy = np.random.rand(self.num_actions)
 
-    def get_strategy(self):
+    def get_strategy(self, realization_weight=1):
         """
         Computes the new mixed-strategy using the current regret sums
         :returns strategy The computed strategy
@@ -56,7 +56,7 @@ class RegretMinimization:
                 # normalizing sum could be non-positive -> make strategy uniform
                 self.strategy[i] = 1.0 / self.num_actions
 
-            self.strategy_sum[i] += self.strategy[i]
+            self.strategy_sum[i] += realization_weight * self.strategy[i]
         return self.strategy
 
     def get_action(self, strategy):
@@ -83,7 +83,7 @@ class RegretMinimization:
 
     def train(self, iterations, utility_function):
         """
-        Train the algorithm using RegretMatching
+        Train the algorithm using RegretMatching for n iterations
         :param iterations The training iterations
         :param utility_function The utility function for calculating the action utilities
         """
