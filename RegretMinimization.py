@@ -1,16 +1,7 @@
 import numpy as np
 import numba
 
-
-@numba.njit()
-def rand_choice_nb(arr, prob):
-    """
-    See https://github.com/numba/numba/issues/2539
-    :param arr: A 1D numpy array of values to sample from.
-    :param prob: A 1D numpy array of probabilities for the given samples.
-    :return: A random sample from the given array with a given probability.
-    """
-    return arr[np.searchsorted(np.cumsum(prob), np.random.random(), side="right")]
+from utils import rand_choice_nb
 
 
 @numba.experimental.jitclass([
@@ -33,7 +24,7 @@ class RegretMinimization:
         self.strategy = np.zeros(self.num_actions)
         self.strategy_sum = np.zeros(self.num_actions)
 
-        # for testing, a simple static opponent strategy for sampling opponent actions
+        # for testing: a simple static opponent strategy for sampling opponent actions
         self.opponent_strategy = np.random.rand(self.num_actions)
 
     def get_strategy(self, realization_weight=1):
