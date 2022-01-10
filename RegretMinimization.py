@@ -1,7 +1,7 @@
 import numpy as np
 import numba
 
-from utils import rand_choice_nb
+from utils import rand_choice_nb, get_action_from_dist
 
 
 @numba.experimental.jitclass([
@@ -58,14 +58,7 @@ class RegretMinimization:
         Updates the strategy and samples an action
         :returns action An action sampled from the current strategy
         """
-        return rand_choice_nb([i for i in range(self.num_actions)], self.get_strategy())
-
-    def get_action_from_dist(self, strategy):
-        """
-        Samples an action using the given mixed-strategy
-        :returns action An action sampled from the current strategy
-        """
-        return rand_choice_nb([i for i in range(self.num_actions)], strategy)
+        return get_action_from_dist(self.get_strategy())
 
     def get_average_strategy(self):
         """
@@ -95,8 +88,8 @@ class RegretMinimization:
 
             # sample action using the current mixed-strategy
             strategy = self.get_strategy()
-            action = self.get_action_from_dist(strategy)
-            opponent_action = self.get_action_from_dist(self.opponent_strategy)
+            action = get_action_from_dist(strategy)
+            opponent_action = get_action_from_dist(self.opponent_strategy)
 
             # compute action utilities using the specified utility function
             action_utility = utility_function(action, opponent_action)

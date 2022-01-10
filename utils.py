@@ -12,3 +12,12 @@ def rand_choice_nb(arr, prob):
     :return: A random sample from the given array with a given probability.
     """
     return arr[np.searchsorted(np.cumsum(prob/np.sum(prob)), np.random.random(), side="right")]
+
+
+@numba.njit()
+def get_action_from_dist(strategy):
+    """
+    Samples an action using the given mixed-strategy
+    :returns action An action sampled from the current strategy
+    """
+    return rand_choice_nb([i for i in range(len(strategy))], strategy)
