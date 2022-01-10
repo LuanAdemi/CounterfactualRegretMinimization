@@ -58,7 +58,7 @@ class RegretMinimization:
         Samples an action with the current mixed-strategy
         :returns action An action sampled from the current strategy
         """
-        return rand_choice_nb([i for i in range(self.num_actions)], self.strategy)
+        return rand_choice_nb([i for i in range(self.num_actions)], strategy)
 
     def get_average_strategy(self):
         """

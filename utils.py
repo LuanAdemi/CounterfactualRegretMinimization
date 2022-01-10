@@ -1,6 +1,7 @@
 import numba
 import numpy as np
 
+
 @numba.njit()
 def rand_choice_nb(arr, prob):
     """
