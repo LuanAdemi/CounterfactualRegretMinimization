@@ -1,4 +1,3 @@
-import numpy as np
 import numba
 
 from RegretMinimization import RegretMinimization
@@ -25,7 +24,7 @@ class Node:
         return f"{self.info_set}: {self.get_average_strategy()}"
 
     """
-    Forward the attributes of the agent
+    Forward the attributes of the regret minimizing agent
     """
     @property
     def regret_sum(self):
