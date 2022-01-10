@@ -53,9 +53,16 @@ class RegretMinimization:
 
         return self.strategy
 
-    def get_action(self, strategy):
+    def get_action(self):
         """
-        Samples an action with the current mixed-strategy
+        Updates the strategy and samples an action
+        :returns action An action sampled from the current strategy
+        """
+        return rand_choice_nb([i for i in range(self.num_actions)], self.get_strategy())
+
+    def get_action_from_dist(self, strategy):
+        """
+        Samples an action using the given mixed-strategy
         :returns action An action sampled from the current strategy
         """
         return rand_choice_nb([i for i in range(self.num_actions)], strategy)
@@ -88,8 +95,8 @@ class RegretMinimization:
 
             # sample action using the current mixed-strategy
             strategy = self.get_strategy()
-            action = self.get_action(strategy)
-            opponent_action = self.get_action(self.opponent_strategy)
+            action = self.get_action_from_dist(strategy)
+            opponent_action = self.get_action_from_dist(self.opponent_strategy)
 
             # compute action utilities using the specified utility function
             action_utility = utility_function(action, opponent_action)
@@ -104,8 +111,7 @@ class RegretMinimization:
         :param action_utility The pre-calculated action utilities
         """
         # sample action using the current mixed-strategy
-        strategy = self.get_strategy()
-        action = self.get_action(strategy)
+        action = self.get_action()
 
         # accumulate actions regrets
         for j in range(self.num_actions):
