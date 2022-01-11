@@ -85,4 +85,3 @@ class CFR:
 
         for a in actions:
             new_env = state.copy()
-

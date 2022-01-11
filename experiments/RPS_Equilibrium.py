@@ -36,7 +36,7 @@ def train_agents():
     agent2 = RegretMinimization(NUM_ACTIONS)
 
     # main loop
-    for e in numba.prange(EPOCHS):
+    for _ in numba.prange(EPOCHS):
         # sample actions
         action_1 = agent1.get_action()
         action_2 = agent2.get_action()

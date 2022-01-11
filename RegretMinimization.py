@@ -1,7 +1,7 @@
 import numpy as np
 import numba
 
-from utils import rand_choice_nb, get_action_from_dist
+from utils import get_action_from_dist
 
 
 @numba.experimental.jitclass([
