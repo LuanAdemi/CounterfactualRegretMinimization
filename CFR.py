@@ -1,4 +1,5 @@
 import numba
+import numpy as np
 
 from RegretMinimization import RegretMinimization
 
@@ -50,3 +51,38 @@ class Node:
         Get the average strategy of the information node
         """
         return self.agent.get_average_strategy()
+
+
+class CFR:
+    def __init__(self, env):
+        self.nodeMap = {}
+        self.env = env
+        self.num_actions = self.env.action_space
+
+    def cfr(self, state, history, agents):
+        turns = len(history)
+        num_agents = len(agents)
+        current_agent = turns % num_agents
+        info_set = str(state) + str(history)
+
+        # return payoff for terminal states
+        # TODO
+
+        # get information node for the current information set
+        node = self.nodeMap[info_set]
+
+        # if the node doesn't exist, create it
+        if node is None:
+            node = Node()
+            node.info_set = info_set
+            self.nodeMap[info_set] = node
+
+        strategy = node.get_strategy(agents[current_agent])
+        util = np.zeros(self.num_actions)
+        node_util = 0
+
+        actions = self.env.load(state)
+
+        for a in actions:
+            new_env = state.copy()
+
