@@ -69,16 +69,18 @@ class CFR:
     """
     def __init__(self, env):
         self.nodeMap = {}
-        self.env = env
 
-    def cfr(self, state, history, realization_weights):
+    def cfr(self, env, history, realization_weights):
         """
         The implementation of CFR using recursion.
+
+        Based on:
+        An Introduction to Counterfactual Regret Minimization
 
         Traverses each node of the game tree and calculates their utility. We later pick the nodes
         with the highest utility and choose the corresponding action.
 
-        :param state: The current information state (basically the state of the env)
+        :param env: The current information state (basically the state of the env)
         :param history: The action history
         :param realization_weights: The probabilities of playing the current information set for each player
         :returns node_util: The utility of the node
@@ -86,15 +88,15 @@ class CFR:
         turns = len(history)
         num_agents = len(realization_weights)
         current_agent = turns % num_agents
-        info_set = str(state) + str(history)
+        info_set = str(env) + str(history)
 
-        possible_actions = state.get_actions()
+        possible_actions = env.get_actions()
         num_actions = len(possible_actions)
 
         # return payoff for terminal states (chess for example, -1 if loss, 0 if draw, 1 if win)
-        if state.done:
+        if env.done:
             # if this is a terminal node, return the payoff for the current player
-            return state.payoff(current_agent)
+            return env.payoff(current_agent)
 
         # get information node for the current information set
         node = self.nodeMap[info_set] if info_set in self.nodeMap else Node(num_actions, info_set)
@@ -109,7 +111,7 @@ class CFR:
         # perform cfr on each game node below this one
         for i, a in enumerate(possible_actions):
             # get the new state and history by performing the action
-            new_state = state.copy().perform(a)
+            new_env = env.perform(a)
             new_history = history + str(a)
 
             # update the realization weights
@@ -117,7 +119,7 @@ class CFR:
             new_realization_weights[current_agent] *= strategy
 
             # get the util for the new game node
-            util[i] = -self.cfr(new_state, new_history, new_realization_weights)
+            util[i] = -self.cfr(new_env, new_history, new_realization_weights)
             node_util += strategy[i] * util[i]
 
         # calculate the regret sum for each action

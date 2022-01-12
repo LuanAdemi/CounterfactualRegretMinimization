@@ -24,12 +24,6 @@ def get_action_from_dist(strategy):
 
 
 class EnvWrapper:
-    def __init__(self, env_name):
-        self.env_name = env_name
-
-    def __copy__(self):
-        return NotImplementedError
-
     @property
     def done(self):
         """
