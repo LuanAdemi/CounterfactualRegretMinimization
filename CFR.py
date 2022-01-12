@@ -2,11 +2,17 @@ import numba
 import numpy as np
 
 from RegretMinimization import RegretMinimization
+from envs import ThreeDTicTacToeEnv
+
+regret_minimization_type = numba.deferred_type()
+regret_minimization_type.define(RegretMinimization.class_type.instance_type)
 
 
 @numba.experimental.jitclass([
-    ("num_actions", numba.int32),
-    ("realization_weight", numba.float32)
+    ('realization_weight', numba.float64),
+    ('num_actions', numba.int32),
+    ('info_set', numba.types.unicode_type),
+    ('agent', regret_minimization_type)
 ])
 class Node:
     """
@@ -62,69 +68,73 @@ class Node:
         return self.agent.get_average_strategy()
 
 
-# TODO: Use numba for this.
-class CFR:
+# TODO: Numba this. It might be hard...
+def cfr(nodeMap, env, history, realization_weights):
     """
-    The CFR class definition.
+    The implementation of CFR using recursion.
+
+    Based on:
+    An Introduction to Counterfactual Regret Minimization
+
+    Traverses each node of the game tree and calculates their utility. We later pick the nodes
+    with the highest utility and choose the corresponding action.
+
+    :param env: The current information state (basically the state of the env)
+    :param history: The action history
+    :param realization_weights: The probabilities of playing the current information set for each player (tuple)
+    :returns node_util: The utility of the node
     """
-    def __init__(self, env):
-        self.nodeMap = {}
+    turns = len(history)
+    num_agents = len(realization_weights)
+    current_agent = turns % num_agents
+    info_set = str(env) + str(history)
 
-    def cfr(self, env, history, realization_weights):
-        """
-        The implementation of CFR using recursion.
+    possible_actions = env.get_actions()
+    num_actions = len(possible_actions)
 
-        Based on:
-        An Introduction to Counterfactual Regret Minimization
+    # return payoff for terminal states (chess for example, -1 if loss, 0 if draw, 1 if win)
+    if env.done:
+        # if this is a terminal node, return the payoff for the current player
+        return env.payoff(current_agent)
 
-        Traverses each node of the game tree and calculates their utility. We later pick the nodes
-        with the highest utility and choose the corresponding action.
+    # get information node for the current information set
+    node = nodeMap[info_set] if info_set in nodeMap else Node(num_actions, info_set)
+    nodeMap[info_set] = node
 
-        :param env: The current information state (basically the state of the env)
-        :param history: The action history
-        :param realization_weights: The probabilities of playing the current information set for each player
-        :returns node_util: The utility of the node
-        """
-        turns = len(history)
-        num_agents = len(realization_weights)
-        current_agent = turns % num_agents
-        info_set = str(env) + str(history)
+    # calculate the current strategy
+    strategy = node.get_strategy(realization_weights[current_agent])
+    util = np.zeros(num_actions)
 
-        possible_actions = env.get_actions()
-        num_actions = len(possible_actions)
+    node_util = 0
 
-        # return payoff for terminal states (chess for example, -1 if loss, 0 if draw, 1 if win)
-        if env.done:
-            # if this is a terminal node, return the payoff for the current player
-            return env.payoff(current_agent)
+    # perform cfr on each game node below this one
+    for i, a in enumerate(possible_actions):
+        # get the new state and history by performing the action
+        new_env = env.perform(a)
+        new_history = history + str(a)
 
-        # get information node for the current information set
-        node = self.nodeMap[info_set] if info_set in self.nodeMap else Node(num_actions, info_set)
-        self.nodeMap[info_set] = node
+        # update the realization weights
+        new_realization_weights = realization_weights
+        new_realization_weights[current_agent] *= strategy[i]
 
-        # calculate the current strategy
-        strategy = node.get_strategy(realization_weights[current_agent])
-        util = np.zeros(possible_actions)
+        # get the util for the new game node
+        util[i] = -cfr(nodeMap, new_env, new_history, new_realization_weights)
+        node_util += strategy[i] * util[i]
 
-        node_util = 0
+    # calculate the regret sum for each action
+    for i, a in enumerate(possible_actions):
+        regret = util[i] - node_util
+        node.regret_sum[i] += realization_weights[current_agent] * regret
 
-        # perform cfr on each game node below this one
-        for i, a in enumerate(possible_actions):
-            # get the new state and history by performing the action
-            new_env = env.perform(a)
-            new_history = history + str(a)
+    return node_util
 
-            # update the realization weights
-            new_realization_weights = realization_weights
-            new_realization_weights[current_agent] *= strategy
 
-            # get the util for the new game node
-            util[i] = -self.cfr(new_env, new_history, new_realization_weights)
-            node_util += strategy[i] * util[i]
+def train(env, iterations):
+    util = 0
+    nodeMap = {}
+    for i in range(iterations):
+        util += cfr(nodeMap, env, "", [1., 1.])
+    print("Average game value: " + util / iterations)
 
-        # calculate the regret sum for each action
-        for i, a in enumerate(possible_actions):
-            regret = util[i] - node_util
-            node.regret_sum[i] += realization_weights[current_agent] * regret
-
-        return node_util
+    for n in nodeMap.values():
+        print(n)

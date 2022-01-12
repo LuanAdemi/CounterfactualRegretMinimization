@@ -9,7 +9,8 @@ from utils import get_action_from_dist
     ('regret_sum', numba.float64[:]),
     ('strategy', numba.float64[:]),
     ('strategy_sum', numba.float64[:]),
-    ('opponent_strategy', numba.float64[:])
+    ('opponent_strategy', numba.float64[:]),
+    ('realization_weight', numba.float64)
 ])
 class RegretMinimization:
     """
@@ -28,7 +29,7 @@ class RegretMinimization:
         # for testing: a simple static opponent strategy for sampling opponent actions
         self.opponent_strategy = np.random.rand(self.num_actions)
 
-    def get_strategy(self, realization_weight=1):
+    def get_strategy(self, realization_weight=1.):
         """
         Computes the new mixed-strategy using the current regret sums
         :returns strategy: The computed strategy
@@ -49,7 +50,8 @@ class RegretMinimization:
                 self.strategy[i] = 1.0 / self.num_actions
 
             # add the calculated strategy to the sum of every strategy to later on compute the average
-            self.strategy_sum[i] += realization_weight * self.strategy[i]
+            self.strategy_sum[i] += self.strategy[i]
+            self.strategy_sum[i] *= realization_weight
 
         return self.strategy
 
