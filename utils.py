@@ -34,7 +34,7 @@ class EnvWrapper:
 
     def perform(self, action):
         """
-        Performs an action
+        Copies the env and performs an action in the copy
         :param action: The action which will be performed
         :return: The next state
         """
