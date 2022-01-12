@@ -79,6 +79,7 @@ def cfr(nodeMap, env, history, realization_weights):
     Traverses each node of the game tree and calculates their utility. We later pick the nodes
     with the highest utility and choose the corresponding action.
 
+    :param nodeMap: The dict containing the whole game tree
     :param env: The current information state (basically the state of the env)
     :param history: The action history
     :param realization_weights: The probabilities of playing the current information set for each player (tuple)
