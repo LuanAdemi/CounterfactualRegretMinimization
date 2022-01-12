@@ -23,8 +23,41 @@ def get_action_from_dist(strategy):
     return rand_choice_nb([i for i in range(len(strategy))], strategy)
 
 
-class GymEnvWrapper:
+class EnvWrapper:
     def __init__(self, env_name):
         self.env_name = env_name
 
-    # TODO
+    def __copy__(self):
+        return NotImplementedError
+
+    @property
+    def done(self):
+        """
+        Returns true, if the last actions resulted in a terminal state
+        :return: true, if state terminal, else false
+        """
+        return NotImplementedError
+
+    def perform(self, action):
+        """
+        Performs an action
+        :param action: The action which will be performed
+        :return: The next state
+        """
+        return NotImplementedError
+
+    def get_actions(self):
+        """
+        Returns a list of legal actions in the current state
+        :return: A list of actions
+        """
+        return NotImplementedError
+
+    def payoff(self, player):
+        """
+        Returns the payoff for the specified player in a terminal state
+        (chess for example, -1 if loss, 0 if draw, 1 if win)
+        :param player: The current player
+        :return: The payoff for the player
+        """
+        return NotImplementedError

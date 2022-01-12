@@ -31,7 +31,7 @@ class RegretMinimization:
     def get_strategy(self, realization_weight=1):
         """
         Computes the new mixed-strategy using the current regret sums
-        :returns strategy The computed strategy
+        :returns strategy: The computed strategy
         """
         normalizing_sum = 0
 
@@ -56,14 +56,14 @@ class RegretMinimization:
     def get_action(self):
         """
         Updates the strategy and samples an action
-        :returns action An action sampled from the current strategy
+        :returns action: An action sampled from the current strategy
         """
         return get_action_from_dist(self.get_strategy())
 
     def get_average_strategy(self):
         """
         Calculates the average strategy
-        :returns avg_strategy The average strategy
+        :returns avg_strategy: The average strategy
         """
         avg_strategy = np.zeros(self.num_actions)
         normalizing_sum = np.sum(self.strategy_sum)
@@ -82,8 +82,8 @@ class RegretMinimization:
         """
         Train the algorithm using RegretMatching for n iterations using the test opponent strategy.
         (This is also somewhat of a template for the training process -> might keep it or put it elsewhere)
-        :param iterations The training iterations
-        :param utility_function The utility function for calculating the action utilities
+        :param iterations: The training iterations
+        :param utility_function: The utility function for calculating the action utilities
         """
         for i in range(iterations):
             # sample action using the current mixed-strategy
@@ -101,7 +101,7 @@ class RegretMinimization:
     def train_step(self, action_utility):
         """
         Perform a single train step
-        :param action_utility The pre-calculated action utilities
+        :param action_utility: The pre-calculated action utilities
         """
         # sample action using the current mixed-strategy
         action = self.get_action()
