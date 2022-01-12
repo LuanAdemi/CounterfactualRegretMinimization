@@ -10,12 +10,12 @@ from RegretMinimization import RegretMinimization
 ])
 class Node:
     """
-    An information set node for CFR containing the regret,
+    An information set node for CFR containing the regret.
     """
-    def __init__(self, num_actions):
+    def __init__(self, num_actions, info_set=""):
         self.num_actions = num_actions
         self.agent = RegretMinimization(self.num_actions)
-        self.info_set = ""
+        self.info_set = info_set  # a string representation of the information node
 
     def __str__(self):
         """
@@ -39,49 +39,81 @@ class Node:
     def strategy_sum(self):
         return self.agent.strategy_sum
 
+    def set_info_set(self, info_set):
+        """
+        Sets the current info_set
+        :param info_set
+        """
+        self.info_set = info_set
+
     def get_strategy(self, realization_weight):
         """
         Get the current strategy of the information node
         :param realization_weight
+        :returns strategy The new strategy
         """
         return self.agent.get_strategy(realization_weight)
 
     def get_average_strategy(self):
         """
         Get the average strategy of the information node
+        :returns avg_strategy The average strategy
         """
         return self.agent.get_average_strategy()
 
 
 class CFR:
+    """
+    The CFR class definition.
+    """
     def __init__(self, env):
         self.nodeMap = {}
         self.env = env
-        self.num_actions = self.env.action_space
 
-    def cfr(self, state, history, agents):
+    def cfr(self, state, history, realization_weights):
+        """
+        The implementation of CFR using recursion.
+
+        Traverses each node of the game tree and calculates their utility. We later pick the nodes
+        with the highest utility and choose the corresponding action.
+
+        :param state The current information state (basically the state of the env)
+        :param history The action history
+        :param realization_weights The probabilities of playing the current information set for each player
+        :returns node_util The utility of the node
+        """
         turns = len(history)
-        num_agents = len(agents)
+        num_agents = len(realization_weights)
         current_agent = turns % num_agents
         info_set = str(state) + str(history)
+
+        possible_actions = state.get_actions()
+        num_actions = len(possible_actions)
 
         # return payoff for terminal states
         # TODO
 
         # get information node for the current information set
-        node = self.nodeMap[info_set]
+        node = self.nodeMap[info_set] if info_set in self.nodeMap else Node(num_actions, info_set)
+        self.nodeMap[info_set] = node
 
-        # if the node doesn't exist, create it
-        if node is None:
-            node = Node()
-            node.info_set = info_set
-            self.nodeMap[info_set] = node
-
-        strategy = node.get_strategy(agents[current_agent])
-        util = np.zeros(self.num_actions)
+        strategy = node.get_strategy(realization_weights[current_agent])
+        util = np.zeros(possible_actions)
         node_util = 0
 
-        actions = self.env.load(state)
+        for i, a in enumerate(possible_actions):
+            new_state = state.copy().perform(a)
+            new_history = history + str(a)
 
-        for a in actions:
-            new_env = state.copy()
+            new_probabilities = realization_weights
+            new_probabilities[current_agent] *= strategy
+
+            util[i] = -self.cfr(new_state, new_history, new_probabilities)
+
+            node_util += strategy[i] * util[i]
+
+        for i, a in enumerate(possible_actions):
+            regret = util[i] - node_util
+            node.regret_sum[i] += realization_weights[current_agent] * regret
+
+        return node_util

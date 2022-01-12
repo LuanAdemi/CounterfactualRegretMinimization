@@ -80,12 +80,12 @@ class RegretMinimization:
 
     def test(self, iterations, utility_function):
         """
-        Train the algorithm using RegretMatching for n iterations using the test opponent strategy
+        Train the algorithm using RegretMatching for n iterations using the test opponent strategy.
+        (This is also somewhat of a template for the training process -> might keep it or put it elsewhere)
         :param iterations The training iterations
         :param utility_function The utility function for calculating the action utilities
         """
         for i in range(iterations):
-
             # sample action using the current mixed-strategy
             strategy = self.get_strategy()
             action = get_action_from_dist(strategy)

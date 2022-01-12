@@ -21,3 +21,10 @@ def get_action_from_dist(strategy):
     :returns action An action sampled from the current strategy
     """
     return rand_choice_nb([i for i in range(len(strategy))], strategy)
+
+
+class GymEnvWrapper:
+    def __init__(self, env_name):
+        self.env_name = env_name
+
+    # TODO
